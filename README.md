@@ -54,12 +54,14 @@ import os
 
 ```python
 # BEFORE (don't do this - secrets visible to everyone!)
-MY_EMAIL = "myemail@gmail.com"
-MY_PASSWORD = "mysecretpassword"
+OWM_API_KEY = "your_openweather_api_key"
+ACCOUNT_SID = "your_twilio_account_sid"
+TWILIO_AUTH_TOKEN = "your_twilio_auth_token"
 
 # AFTER (secrets stored securely in GitHub)
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
+OWM_API_KEY = os.environ.get("OWM_API_KEY")
+ACCOUNT_SID = os.environ.get("ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 ```
 
 #### 3c. Add your dependencies
@@ -89,11 +91,9 @@ GitHub Secrets keeps them safe and hidden.
 
 | Name          | Value                               |
 | ------------- | ----------------------------------- |
-| `MY_EMAIL`    | your email address                  |
-| `MY_PASSWORD` | your email password or app password |
-
-> **Gmail Users:** You need an "App Password", not your regular password.
-> Get one here: https://myaccount.google.com/apppasswords
+| `OWM_API_KEY` | your OpenWeatherMap API key         |
+| `ACCOUNT_SID` | your Twilio account SID             |
+| `TWILIO_AUTH_TOKEN` | your Twilio auth token      |
 
 ---
 
@@ -135,7 +135,7 @@ Change the numbers to set your schedule:
 3. Click **"Run workflow"** → **"Run workflow"**
 
 This checks that:
-- Your secrets are configured
+- It reports whether your secrets are configured
 - All required files exist
 - Your Python code has no syntax errors
 
@@ -183,14 +183,14 @@ Watch it run! Click on the job to see the output.
 
 ### "My secrets aren't working"
 
-- Secret names are case-sensitive: `MY_EMAIL` is different from `my_email`
-- In your code, use the exact same name: `os.environ.get("MY_EMAIL")`
+- Secret names are case-sensitive: `OWM_API_KEY` is different from `owm_api_key`
+- In your code, use the exact same name: `os.environ.get("OWM_API_KEY")`
 - In the workflow file, the secret must be passed to the script (already done in template)
 
-### "Email not sending"
+### "SMS not sending"
 
-- Gmail requires an **App Password**, not your regular password
-- Check that "Less secure apps" is enabled (some providers)
+- Verify `ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` are correct
+- Check your Twilio number, destination number, and WhatsApp template/content SID settings
 - Check the Actions log for error messages
 
 ---

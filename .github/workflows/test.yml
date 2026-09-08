@@ -21,29 +21,41 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Check secrets are configured
+      - name: Check whether secrets are configured
         env:
-          MY_EMAIL: ${{ secrets.MY_EMAIL }}
-          MY_PASSWORD: ${{ secrets.MY_PASSWORD }}
+          OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
+          ACCOUNT_SID: ${{ secrets.ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
         run: |
-          if [ -z "$MY_EMAIL" ]; then
-            echo "MY_EMAIL secret is not set!"
-            echo "Go to Settings > Secrets > Actions and add it."
-            exit 1
+          missing_secrets=0
+
+          if [ -z "$OWM_API_KEY" ]; then
+            echo "::warning::OWM_API_KEY secret is not set. Go to Settings > Secrets > Actions and add it."
+            missing_secrets=1
           else
-            echo "MY_EMAIL is configured"
+            echo "OWM_API_KEY is configured"
           fi
 
-          if [ -z "$MY_PASSWORD" ]; then
-            echo "MY_PASSWORD secret is not set!"
-            echo "Go to Settings > Secrets > Actions and add it."
-            exit 1
+          if [ -z "$ACCOUNT_SID" ]; then
+            echo "::warning::ACCOUNT_SID secret is not set. Go to Settings > Secrets > Actions and add it."
+            missing_secrets=1
           else
-            echo "MY_PASSWORD is configured"
+            echo "ACCOUNT_SID is configured"
+          fi
+
+          if [ -z "$TWILIO_AUTH_TOKEN" ]; then
+            echo "::warning::TWILIO_AUTH_TOKEN secret is not set. Go to Settings > Secrets > Actions and add it."
+            missing_secrets=1
+          else
+            echo "TWILIO_AUTH_TOKEN is configured"
           fi
 
           echo ""
-          echo "All secrets are configured!"
+          if [ "$missing_secrets" -eq 0 ]; then
+            echo "All secrets are configured!"
+          else
+            echo "One or more secrets are missing. Add them before running the Daily Script workflow."
+          fi
 
       - name: Check required files exist
         run: |
