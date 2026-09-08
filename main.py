@@ -1,38 +1,43 @@
-# To run and test the code you need to update 4 places:
-# 1. Change MY_EMAIL/MY_PASSWORD to your own details.
-# 2. Go to your email provider and make it allow less secure apps.
-# 3. Update the SMTP ADDRESS to match your email provider.
-# 4. Update birthdays.csv to contain today's month and day.
-# See the solution video in the 100 Days of Python Course for explainations.
-
-
-from datetime import datetime
-import pandas
-import random
-import smtplib
+import requests
+from twilio.rest import Client
 import os
 
-# import os and use it to get the Github repository secrets
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
+OWM_Endpoint = "https://api.openweathermap.org/data/2.5/forecast?"
+weather_api = os.environ.get("OWM_API_KEY")
+account_sid = os.environ.get("ACCOUNT_SID")
+auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
 
-today = datetime.now()
-today_tuple = (today.month, today.day)
+parameters = {
+"lat" : 12.7445,
+"lon" : 75.0288,
+"appid" : weather_api,
+"cnt" : 4,
+}
 
-data = pandas.read_csv("birthdays.csv")
-birthdays_dict = {(data_row["month"], data_row["day"])                  : data_row for (index, data_row) in data.iterrows()}
-if today_tuple in birthdays_dict:
-    birthday_person = birthdays_dict[today_tuple]
-    file_path = f"letter_templates/letter_{random.randint(1, 3)}.txt"
-    with open(file_path) as letter_file:
-        contents = letter_file.read()
-        contents = contents.replace("[NAME]", birthday_person["name"])
+url = OWM_Endpoint
+response = requests.post(url,params=parameters)
+response.raise_for_status()
+weather_data = response.json()
 
-    with smtplib.SMTP("YOUR EMAIL PROVIDER SMTP SERVER ADDRESS") as connection:
-        connection.starttls()
-        connection.login(MY_EMAIL, MY_PASSWORD)
-        connection.sendmail(
-            from_addr=MY_EMAIL,
-            to_addrs=birthday_person["email"],
-            msg=f"Subject:Happy Birthday!\n\n{contents}"
-        )
+# list_of_weather_id = [weather_data["list"][i]["weather"][0]["id"] for i in range(len(weather_data["list"]))]
+list_of_weather_id = [hour_data["weather"][0]["id"] for hour_data in (weather_data["list"])]
+print(list_of_weather_id)
+will_rain = False
+if any(list_of_weather_id) < 700:
+    will_rain = True
+
+if will_rain:
+    client = Client(account_sid, auth_token)
+    message = client.messages.create(
+        to="+918088016312",
+        from_="+17372212163",
+        body="sms_event_notifications",
+    )
+
+    msg = client.messages.create(
+        to="whatsapp:+918088016312",
+        from_="whatsapp:+17372212163",
+        content_sid="HXd3d932e8cb4598189831c97250c43d17",
+    )
+    print(msg.status)
+    print(message.status)
